@@ -1,7 +1,7 @@
 function App() {
   return (
     <>
-      <h1>Hello, world</h1>
+      <h1 class="text-center mb-4">React Todo</h1>
     </>
   );
 }

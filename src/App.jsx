@@ -1,25 +1,8 @@
-import { useState } from 'react';
-import Button from './components/Button';
+import { useEffect, useState, useCallback } from 'react';
+import { todosData } from './assets/data';
+import { TodoItem } from './components/TodoItem';
 
 function App() {
-  // const todos = [
-  //   {
-  //     id: 1,
-  //     title: 'First todo item',
-  //     isDone: false,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'Second todo item',
-  //     isDone: false,
-  //   },
-  //   {
-  //     id: 3,
-  //     title: 'A completed todo item',
-  //     isDone: true,
-  //   },
-  // ];
-
   const [task, setTask] = useState('');
   const [todos, setTodos] = useState([]);
 
@@ -41,22 +24,30 @@ function App() {
     setTask('');
   }
 
-  function removeTodo(task) {
-    let newTodos = [...todos];
-    newTodos.splice(todos.indexOf(task), 1);
-    setTodos(newTodos);
-  }
+  const handleToggle = useCallback(
+    id =>
+      setTodos(prev => {
+        return prev.map(item => {
+          if (item.id === id) {
+            return { ...item, isDone: !item.isDone };
+          }
+          return item;
+        });
+      }),
+    []
+  );
 
-  function toggleTodo(id) {
-    const newTodos = todos.map(item => {
-      if (item.id === id) {
-        return { ...item, isDone: !item.isDone };
-      }
-      return item;
-    });
+  const handleDelete = useCallback(id => {
+    setTodos(prev => prev.filter(item => item.id !== id));
+  }, []);
 
-    setTodos(newTodos);
-  }
+  useEffect(() => {
+    const mockResponse = setTimeout(() => {
+      setTodos(todosData);
+    }, 1500);
+
+    return () => clearTimeout(mockResponse);
+  }, []);
 
   return (
     <>
@@ -83,26 +74,7 @@ function App() {
         <div className="card mt-4">
           <ul className="list-group list-group-flush">
             {todos.map(item => (
-              <li
-                className={`list-group-item d-flex justify-content-between align-items-center ${
-                  item.isDone ? 'text-decoration-line-through text-muted' : ''
-                }`}
-                key={item.id}
-              >
-                {item.title}
-                <div>
-                  <Button
-                    type={'button'}
-                    classes={`btn ${item.isDone ? 'btn-warning' : 'btn-success'} btn-sm me-2`}
-                    onClick={() => toggleTodo(item.id)}
-                  >
-                    {item.isDone ? 'Undo' : 'Done'}
-                  </Button>
-                  <Button type={'button'} classes={'btn btn-danger btn-sm'} onClick={() => removeTodo(item)}>
-                    Delete
-                  </Button>
-                </div>
-              </li>
+              <TodoItem key={item.id} item={item} toggleTodo={handleToggle} removeTodo={handleDelete} />
             ))}
           </ul>
         </div>
